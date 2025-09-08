@@ -3,6 +3,8 @@
 
 int servoPin = 2;
 int servoPos = 90;
+int desiredAngle = 90;
+int offsetAngle = 0;
 Servo myServo;
 float RateRoll, RatePitch, RateYaw;
 float RateCalibrationPitch;
@@ -110,6 +112,12 @@ void loop() {
   DesiredAnglePitch = 0.10 * (ReceiverValue[1] - 1500) + 190;
   ErrorAnglePitch = DesiredAnglePitch - KalmanAnglePitch;
 
+  if (Serial.available() != 0)
+  {
+    offsetAngle = Serial.parseInt();
+  }
+  desiredAngle = 90 + offsetAngle;
+
   if (servoPos < 0) {
     servoPos = 0;
   }
@@ -118,10 +126,10 @@ void loop() {
   }
 
   if (AccX > 0) {
-    servoPos = 90 - (90 - AccY * 90);
+    servoPos = desiredAngle - (desiredAngle - AccY * desiredAngle);
   }
   if (AccX < 0) {
-    servoPos = 90 + (90 - AccY * 90);
+    servoPos = desiredAngle + (desiredAngle - AccY * desiredAngle);
   }
 
 
@@ -129,6 +137,8 @@ void loop() {
 
   Serial.print("Servo Angle: ");
   Serial.print(servoPos);
+  Serial.print(" | Offset Angle: ");
+  Serial.print(offsetAngle);
   Serial.print(" | Acc X: ");
   Serial.print(AccX);
   Serial.print(" | Acc Y: ");
