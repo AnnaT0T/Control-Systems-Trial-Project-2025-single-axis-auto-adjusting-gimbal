@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 int servoPin = 2;
-int servoPos = 0;
+int servoPos = 90;
 Servo myServo;
 float RateRoll, RatePitch, RateYaw;
 float RateCalibrationPitch;
@@ -110,15 +110,41 @@ void loop() {
   DesiredAnglePitch = 0.10 * (ReceiverValue[1] - 1500) + 190;
   ErrorAnglePitch = DesiredAnglePitch - KalmanAnglePitch;
 
+  if (servoPos < 0) {
+    servoPos = 0;
+  }
+  if (servoPos > 180) {
+    servoPos = 180;
+  }
 
-  Serial.print("Acc X: ");
+  if (AccX > 0) {
+    servoPos = 90 - (90 - AccY * 90);
+  }
+  if (AccX < 0) {
+    servoPos = 90 + (90 - AccY * 90);
+  }
+
+
+
+
+  Serial.print("Servo Angle: ");
+  Serial.print(servoPos);
+  Serial.print(" | Acc X: ");
   Serial.print(AccX);
   Serial.print(" | Acc Y: ");
   Serial.print(AccY);
   Serial.print(" | AccZ: ");
   Serial.println(AccZ);
+  myServo.write(servoPos);
+  /*
+  myServo.write(0);
+  delay(1000);
+  myServo.write(90);
+  delay(1000);
+  myServo.write(180);
+  delay(1000);*/
   delay(50);
-  //myServo.write(DesiredAnglePitch);
+  
   /*
   // put your main code here, to run repeatedly:
   Serial.println("What Angle for the Servo? "); // ask
