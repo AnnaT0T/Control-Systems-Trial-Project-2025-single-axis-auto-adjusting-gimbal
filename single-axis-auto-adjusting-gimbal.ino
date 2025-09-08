@@ -9,7 +9,8 @@ Servo myServo;
 float AccX, AccY, AccZ;
 
 void gyro_signals(void) {
-  // necessary?
+// collect x, y, z acceleration data from MPU6050
+  // all necessary?
   Wire.beginTransmission(0x68);
   Wire.write(0x1A);
   Wire.write(0x05);
@@ -32,26 +33,32 @@ void gyro_signals(void) {
 
 void setup() {
   // put your setup code here, to run once:
+  // initialize MPU6050
   Wire.begin();
   delay(250);
   Wire.beginTransmission(0x68);
   Wire.write(0x6B);
   Wire.write(0x00);
   Wire.endTransmission();
+  // initialize servo
   myServo.attach(servoPin);
+  // initialize serial monitor
   Serial.begin(115200);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  gyro_signals();
+  gyro_signals(); // collect x, y, z acceleration data from MPU6050
 
   if (Serial.available() != 0)
+  // check if the user inputted anything into serial monitor, if so, read angle
   {
     offsetAngle = Serial.parseInt();
   }
-  desiredAngle = 90 + offsetAngle;
+  desiredAngle = 90 + offsetAngle; // adjust default desired angle (90 deg, pointing up) to account for offset angle
 
+  // adjust servo angle so that it's always pointing towards the desired angle
+  // determine if add/subtract adjustment angle depending on if servo is currently pointing to the left/right of x-axis
   if (AccX > 0) {
     servoPos = desiredAngle - (desiredAngle - AccY * desiredAngle);
   }
@@ -59,6 +66,7 @@ void loop() {
     servoPos = desiredAngle + (desiredAngle - AccY * desiredAngle);
   }
 
+  // ensure code is not pushing servo to adjust beyond its limits (range: 0 to 180 deg)
   if (servoPos < 0) {
     servoPos = 0;
   }
@@ -66,6 +74,7 @@ void loop() {
     servoPos = 180;
   }
 
+  // print servo angle, offset angle, x, y, z acceleration to serial monitor
   Serial.print("Servo Angle: ");
   Serial.print(servoPos);
   Serial.print(" | Offset Angle: ");
@@ -76,8 +85,8 @@ void loop() {
   Serial.print(AccY);
   Serial.print(" | AccZ: ");
   Serial.println(AccZ);
-  myServo.write(servoPos);
-  delay(50);
+  myServo.write(servoPos); // set servo to calculated angle to make it point towards desired angle
+  delay(50); // if too fast, everything moves too quick, issues like serial monitor displaying random characters
 }
 
 
