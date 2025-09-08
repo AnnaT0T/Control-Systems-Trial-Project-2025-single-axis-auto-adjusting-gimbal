@@ -83,7 +83,7 @@ void loop() {
   Serial.print(AccX);
   Serial.print(" | Acc Y: ");
   Serial.print(AccY);
-  Serial.print(" | AccZ: ");
+  Serial.print(" | Acc Z: ");
   Serial.println(AccZ);
   myServo.write(servoPos); // set servo to calculated angle to make it point towards desired angle
   delay(50); // if too fast, everything moves too quick, issues like serial monitor displaying random characters
